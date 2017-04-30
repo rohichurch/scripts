@@ -13,7 +13,7 @@
 # be provided which will then be used for adding the sermon
 # to the church's website.
 
-NOTIFICATION_ADDRESS="devops-team@rohichurch.org"
+NOTIFICATION_ADDRESS="devops-team@rohichurch.org,jonathan@rohichurch.org,rene@rohichurch.org"
 
 CURRENT_YEAR=$(date +"%Y")
 DEFAULT_SONGS_DIR="$HOME/Desktop/Mixdowns"
@@ -37,9 +37,11 @@ function get_sermon_info {
     read -p "Enter sermon series name: " SERMON_SERIES
     SERMON_MP3_FILENAME="${SERMON_MP3_FILENAME} ${SERMON_SERIES} -"
     read -p "What number is this in the series?: " TRACK_NUMBER
+    TRACK_NUMBER=$( printf "%02d" ${TRACK_NUMBER} )
     SERMON_MP3_FILENAME="${SERMON_MP3_FILENAME} ${TRACK_NUMBER} -"
   fi
   SERMON_MP3_FILENAME="${SERMON_MP3_FILENAME} ${SERMON_TITLE}.mp3"
+  SERMON_MP3_FILENAME=$( echo ${SERMON_MP3_FILENAME} | tr -d '?' )
 }
 
 function convert_to_mp3 {
@@ -111,8 +113,10 @@ banner "Uploading to Amazon AWS..."
 upload_to_s3 "${DROPBOX_SERMON_DIR}/${SERMON_MP3_FILENAME}"
 banner "Done uploading."
 
-banner "Open http://www.rohichurch.org/admin and add go to Sermons > Add New"
 MP3_LOCATION=$(get_podcast_aws_url)
+
+banner "Open http://www.rohichurch.org/admin and add go to Sermons > Add New"
+banner "Location of MP3: ${MP3_LOCATION}"
 
 send_email_notification \
   "${NOTIFICATION_ADDRESS}" \
